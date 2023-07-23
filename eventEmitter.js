@@ -3,7 +3,7 @@
  * https://nodejs.dev/en/api/v20/events/
  */
 
-const EventEmitter = require("events");
+const EventEmitter = require("node:events");
 
 // init eventEmitter
 const eventEmitter = new EventEmitter();
@@ -76,3 +76,92 @@ console.log(eventEmitter.listenerCount("REMOVE_EVENT")); // 2
 console.log(eventEmitter.listenerCount("REMOVE_EVENT")); // 2
 eventEmitter.removeAllListeners("REMOVE_EVENT");
 console.log(eventEmitter.listenerCount("REMOVE_EVENT")); // 0
+
+/**
+ * Event emitter my usage
+ */
+let serviceEvent = null;
+
+function getServiceEvent() {
+  if (serviceEvent) {
+    return serviceEvent;
+  }
+
+  return (serviceEvent = new ServiceEvent());
+}
+
+const eventTypes = {
+  USER_SIGNUP: "SIGNUP",
+  USER_INVITE_EVENT_CODE_REGISTER: "USER_INVITE_EVENT_CODE_REGISTER",
+  SYSTEM_CREATE_DEFAULT_PROFILE: "SYSTEM_CREATE_DEFAULT_PROFILE",
+  SYSTEM_PUSH_SIGNUP_CELEBRATION: "SYSTEM_PUSH_SIGNUP_CELEBRATION",
+  SYSTEM_SEND_SIGNUP_EVENT_TO_AMPLITUDE:
+    "SYSTEM_SEND_SIGNUP_EVENT_TO_AMPLITUDE",
+};
+
+class ServiceEvent extends EventEmitter {
+  constructor() {
+    super();
+
+    /**
+     * User Events
+     */
+    this.on(eventTypes.USER_SIGNUP, (data) => {
+      try {
+        console.log("processing user signup...", data);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.on(eventTypes.USER_INVITE_EVENT_CODE_REGISTER, (data) => {
+      try {
+        console.log("processing user invite event code register...", data);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    /**
+     * System Events
+     */
+    this.on(eventTypes.SYSTEM_CREATE_DEFAULT_PROFILE, (data) => {
+      try {
+        console.log("processing system create default profile...", data);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.on(eventTypes.SYSTEM_PUSH_SIGNUP_CELEBRATION, (data) => {
+      try {
+        console.log("processing system push signup celebration...", data);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.on(eventTypes.SYSTEM_SEND_SIGNUP_EVENT_TO_AMPLITUDE, (data) => {
+      try {
+        console.log(
+          "processing system send signup event to amplitude...",
+          data
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  }
+}
+
+getServiceEvent();
+
+(async function signupPostAPI(data) {
+  serviceEvent.emit(eventTypes.USER_SIGNUP, data);
+  serviceEvent.emit(eventTypes.USER_INVITE_EVENT_CODE_REGISTER, data);
+  serviceEvent.emit(eventTypes.SYSTEM_CREATE_DEFAULT_PROFILE, data);
+  serviceEvent.emit(eventTypes.SYSTEM_PUSH_SIGNUP_CELEBRATION, data);
+  serviceEvent.emit(eventTypes.SYSTEM_SEND_SIGNUP_EVENT_TO_AMPLITUDE, data);
+
+  return "200 OK";
+})({ id: 123, name: "hello" }).then((res) => console.log(res));
